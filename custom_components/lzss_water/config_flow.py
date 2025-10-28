@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import DOMAIN, CONF_ACCOUNT_NUMBER
+from .const import DOMAIN, CONF_ACCOUNT_NUMBER, CONF_TOKEN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,16 +26,17 @@ class WaterBillConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             account_number = user_input[CONF_ACCOUNT_NUMBER]
-            
+            wx_token = user_input[CONF_TOKEN]
             # 设置唯一ID
             await self.async_set_unique_id(account_number)
             self._abort_if_unique_id_configured()
 
-            # 创建配置条目
+            # 创建配置条目（注意：async_create_entry 接收 title 和 data 两个主要参数）
             return self.async_create_entry(
                 title=f"水费账户 {account_number}",
                 data={
-                    CONF_ACCOUNT_NUMBER: account_number
+                    CONF_ACCOUNT_NUMBER: account_number,
+                    CONF_TOKEN: wx_token
                 }
             )
 
@@ -44,7 +45,8 @@ class WaterBillConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_ACCOUNT_NUMBER): str
+                    vol.Required(CONF_ACCOUNT_NUMBER): str,
+                    vol.Required(CONF_TOKEN): str
                 }
             ),
             errors=errors

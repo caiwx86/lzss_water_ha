@@ -2,9 +2,10 @@
 from datetime import timedelta
 
 DOMAIN = "lzss_water"
-DEFAULT_SCAN_INTERVAL = timedelta(hours=8)
+DEFAULT_SCAN_INTERVAL = timedelta(hours=23, minutes=56, seconds=53)
 CONF_ACCOUNT_NUMBER = "account_number"
-API_BASE_URL = "https://wt.lzss.com/fee/waterfee.aspx"
+CONF_TOKEN = "token"
+API_BASE_URL = "https://osh.lzss.com/wx_lz/bill/arrearageKoi"
 
 # 传感器ID
 SENSOR_BALANCE = "lzss_water_balance"     # 余额传感器

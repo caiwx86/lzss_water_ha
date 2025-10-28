@@ -3,9 +3,10 @@
         "step": {
             "user": {
                 "title": "水费查询配置",
-                "description": "请输入您的户号",
+                "description": "请输入您的户号和访问令牌（Token）",
                 "data": {
-                    "account_number": "户号"
+                    "account_number": "户号",
+                    "token": "访问令牌"
                 }
             }
         },

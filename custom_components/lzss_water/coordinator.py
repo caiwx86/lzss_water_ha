@@ -23,6 +23,7 @@ class WaterBillDataUpdateCoordinator(DataUpdateCoordinator):
         self,
         hass: HomeAssistant,
         account_number: str,
+        token: str,
         update_interval: timedelta = DEFAULT_SCAN_INTERVAL,
     ) -> None:
         """初始化协调器。"""
@@ -33,6 +34,7 @@ class WaterBillDataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=update_interval,
         )
         self._account_number = account_number
+        self._token = token
         self._session = aiohttp.ClientSession()
 
     @property
@@ -40,69 +42,44 @@ class WaterBillDataUpdateCoordinator(DataUpdateCoordinator):
         """返回账号。"""
         return self._account_number
 
-    async def _get_form_values(self) -> Dict[str, str]:
-        """获取表单验证值。"""
-        try:
-            async with self._session.get(API_BASE_URL) as response:
-                response.raise_for_status()
-                html = await response.text()
-
-            soup = BeautifulSoup(html, 'html.parser')
-            viewstate = soup.find('input', {'id': '__VIEWSTATE'})
-            viewstategenerator = soup.find('input', {'id': '__VIEWSTATEGENERATOR'})
-            eventvalidation = soup.find('input', {'id': '__EVENTVALIDATION'})
-
-            if not all([viewstate, viewstategenerator, eventvalidation]):
-                raise UpdateFailed("无法获取表单验证值")
-
-            return {
-                "__VIEWSTATE": viewstate.get('value', ''),
-                "__VIEWSTATEGENERATOR": viewstategenerator.get('value', ''),
-                "__EVENTVALIDATION": eventvalidation.get('value', '')
-            }
-        except Exception as err:
-            _LOGGER.error("获取表单验证值失败: %s", str(err))
-            raise UpdateFailed(f"获取表单验证值失败: {err}")
-
     async def _fetch_data(self) -> Dict[str, Any]:
         """获取水费数据。"""
-        form_values = await self._get_form_values()
-        current_date = datetime.now()
-        
-        data = {
-            **form_values,
-            "startMonth": f"{current_date.year}/{current_date.month}",
-            "endMonth": f"{current_date.year}/{current_date.month}",
-            "userCode": self._account_number,
-            "userName": "",
-            "vaCode": "",
-            "btnSender": "提交"
-        }
+        data_json = { "userNo":f"{self._account_number}"}
 
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Origin": "https://wt.lzss.com",
-            "Referer": "https://wt.lzss.com/fee/waterfee.aspx"
+            "Content-Type": "application/json;charset=UTF-8",
+            "Authorization": f"{self._token}"
         }
 
-        async with self._session.post(API_BASE_URL, data=data, headers=headers) as response:
+        # 使用 json= 让 aiohttp 正确把 body 序列化为 JSON
+        async with self._session.post(API_BASE_URL, json=data_json, headers=headers) as response:
             response.raise_for_status()
+
+            # 根据返回的 Content-Type 决定解析方式：优先处理 JSON，否则回退到 HTML 解析
+            content_type = response.headers.get("Content-Type", "")
+            if "application/json" in content_type:
+                try:
+                    resp_json = await response.json()
+                except Exception as e:
+                    _LOGGER.error("解析 JSON 响应失败: %s", e)
+                    raise UpdateFailed(f"解析 JSON 响应失败: {e}")
+
+                balance = self._extract_balance_from_json(resp_json)
+                return {"balance": balance}
+
+            # 非 JSON 回退到原始 HTML 解析
             html = await response.text()
 
         soup = BeautifulSoup(html, 'html.parser')
         listview = soup.find('ul', {'id': 'listview'})
-        
+
         if not listview:
             raise UpdateFailed("未找到数据列表")
 
-        return {
-            "balance": self._extract_balance(listview),
-            "unpaid_count": self._extract_unpaid_count(listview),
-            "unpaid_amount": self._extract_unpaid_amount(listview)
-        }
+        return {"balance": self._extract_balance(listview)}
 
     async def _async_update_data(self) -> Dict[str, Any]:
         """从水费网站获取数据。"""
@@ -113,9 +90,6 @@ class WaterBillDataUpdateCoordinator(DataUpdateCoordinator):
 
                 return {
                     "current_balance": data["balance"],
-                    "current_month": f"{current_date.year}/{current_date.month}",
-                    "unpaid_count": data["unpaid_count"],
-                    "unpaid_amount": data["unpaid_amount"]
                 }
 
         except Exception as err:
@@ -136,32 +110,56 @@ class WaterBillDataUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.error("提取余额时出错: %s", str(e))
             return 0.0
 
-    def _extract_unpaid_count(self, element: BeautifulSoup) -> int:
-        """从HTML元素中提取未缴费笔数。"""
-        try:
-            items = element.find_all('li')
-            for item in items:
-                text = item.text.strip()
-                if "未缴费笔数" in text:
-                    value = ''.join(c for c in text if c.isdigit())
-                    return int(value) if value else 0
-            return 0
-        except Exception as e:
-            _LOGGER.error("提取未缴费笔数时出错: %s", str(e))
-            return 0
+    def _extract_balance_from_json(self, data: Dict[str, Any]) -> float:
+        """从 JSON 响应中提取余额。
 
-    def _extract_unpaid_amount(self, element: BeautifulSoup) -> float:
-        """从HTML元素中提取未缴费金额。"""
+        该方法尽量兼容几种常见结构：
+        - {"balance": 123.45}
+        - {"balance": "123.45"}
+        - {"data": {"balance": 123.45}}
+        - 嵌套或不同命名时，尽最大努力查找包含关键字 "balance" 或 "余额" 的字段。
+        """
         try:
-            items = element.find_all('li')
-            for item in items:
-                text = item.text.strip()
-                if "未缴费金额" in text:
-                    value = ''.join(c for c in text if c.isdigit() or c == '.')
-                    return float(value) if value else 0.0
+            # 直接键
+            if isinstance(data, dict):
+                # 常用键
+                for key in ("balance", "余额", "amount", "balanceAmount"):
+                    if key in data:
+                        return self._to_float(data[key])
+
+                # 嵌套 data 字段
+                if "data" in data and isinstance(data["data"], dict):
+                    for key in ("balance", "余额", "amount", "balanceAmount"):
+                        if key in data["data"]:
+                            return self._to_float(data["data"][key])
+
+                # 遍历所有数值字段尝试匹配字段名中含 balance/余额 的键
+                for k, v in data.items():
+                    if isinstance(k, str) and ("balance" in k.lower() or "余额" in k):
+                        return self._to_float(v)
+
+            # 无法找到时返回 0.0
             return 0.0
         except Exception as e:
-            _LOGGER.error("提取未缴费金额时出错: %s", str(e))
+            _LOGGER.error("从 JSON 中提取余额出错: %s", e)
+            return 0.0
+
+    def _to_float(self, value: Any) -> float:
+        """把任意值安全转换为 float，遇到不可解析的返回 0.0。"""
+        try:
+            if value is None:
+                return 0.0
+            if isinstance(value, (int, float)):
+                return float(value)
+            if isinstance(value, str):
+                # 去掉千分位逗号和空格
+                s = value.replace(',', '').strip()
+                # 保留数字和小数点、前导负号
+                filtered = ''.join(ch for ch in s if (ch.isdigit() or ch in '.-'))
+                return float(filtered) if filtered not in ('', '.', '-', '-.') else 0.0
+            # 其他类型尝试直接转
+            return float(value)
+        except Exception:
             return 0.0
 
     async def async_close(self) -> None:

@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_SCAN_INTERVAL
 
 
-from .const import DOMAIN, DEFAULT_SCAN_INTERVAL, CONF_ACCOUNT_NUMBER
+from .const import DOMAIN, DEFAULT_SCAN_INTERVAL, CONF_ACCOUNT_NUMBER, CONF_TOKEN
 from .coordinator import WaterBillDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = WaterBillDataUpdateCoordinator(
         hass,
         entry.data[CONF_ACCOUNT_NUMBER],
+        entry.data[CONF_TOKEN],
         entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
     )
 
