@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 DOMAIN = "lzss_water"
-DEFAULT_SCAN_INTERVAL = timedelta(hours=23, minutes=56, seconds=53)
+DEFAULT_SCAN_INTERVAL = timedelta(hours=11, minutes=58, seconds=50)
 CONF_ACCOUNT_NUMBER = "account_number"
 CONF_TOKEN = "token"
 API_BASE_URL = "https://osh.lzss.com/wx_lz/bill/arrearageKoi"
