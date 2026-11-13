@@ -236,7 +236,14 @@ pip install beautifulsoup4
 python -m unittest discover -s tests -v
 ```
 
-## 版本 3.0.0
+## 更新日志
+
+### 3.0.1
+
+- 修复金额传感器单位从“元”切换为“CNY”导致 Home Assistant 长期统计被抑制的问题
+- 余额和未缴费金额保持旧版“元”单位，已有长期统计可直接继续使用
+
+### 3.0.0
 
 - 重构为 `api / coordinator / parser / entity` 分层结构，移除全局 `hass.data` 和未关闭的私有 aiohttp 会话
 - 新增未缴费笔数、未缴费金额、欠费状态、手动刷新按钮、户名/地址诊断实体
@@ -246,7 +253,6 @@ python -m unittest discover -s tests -v
 - 新增诊断信息导出（自动脱敏）
 - 新增 v1 → v2 配置迁移
 - 默认刷新间隔调整为 12 小时（可在选项中修改）
-- 金额传感器保持“元”单位，避免升级后已有长期统计因单位从“元”变成“CNY”而被抑制
 - 解析层兼容字段大小写、中文键名、账单数组、旧版 HTML
 - 修复 README 中已失效的 YAML 配置说明
 
