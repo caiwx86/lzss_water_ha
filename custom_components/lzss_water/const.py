@@ -1,16 +1,33 @@
-"""水费查询集成常量定义。"""
-from datetime import timedelta
+"""兴泸水务集成常量。"""
 
-DOMAIN = "lzss_water"
-DEFAULT_SCAN_INTERVAL = timedelta(hours=11, minutes=58, seconds=50)
-CONF_ACCOUNT_NUMBER = "account_number"
-CONF_TOKEN = "token"
-API_BASE_URL = "https://osh.lzss.com/wx_lz/bill/arrearageKoi"
+from __future__ import annotations
 
-# 传感器ID
-SENSOR_BALANCE = "lzss_water_balance"     # 余额传感器
+from typing import Final
 
-# Error messages
-ERROR_CONNECTION = "connection_error"
-ERROR_TIMEOUT = "timeout_error"
-ERROR_UNKNOWN = "unknown_error" 
+DOMAIN: Final = "lzss_water"
+NAME: Final = "兴泸水务"
+MANUFACTURER: Final = "兴泸水务"
+MODEL: Final = "水费查询"
+CONFIGURATION_URL: Final = "https://osh.lzss.com/"
+
+CONF_ACCOUNT_NUMBER: Final = "account_number"
+CONF_TOKEN: Final = "token"
+CONF_SCAN_INTERVAL: Final = "scan_interval"
+
+DEFAULT_SCAN_INTERVAL_HOURS: Final = 12
+MIN_SCAN_INTERVAL_HOURS: Final = 1
+MAX_SCAN_INTERVAL_HOURS: Final = 168
+
+API_BASE_URL: Final = "https://osh.lzss.com/wx_lz/bill/arrearageKoi"
+API_TIMEOUT: Final = 15
+API_USER_AGENT: Final = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+)
+
+ATTR_ACCOUNT_NUMBER: Final = "account_number"
+ATTR_BILLING_MONTH: Final = "billing_month"
+ATTR_BILLS: Final = "bills"
+ATTR_LAST_UPDATE: Final = "last_update"
+ATTR_UNPAID_AMOUNT: Final = "unpaid_amount"
+ATTR_UNPAID_COUNT: Final = "unpaid_count"

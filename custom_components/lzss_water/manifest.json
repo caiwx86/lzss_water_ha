@@ -1,11 +1,16 @@
 {
   "domain": "lzss_water",
   "name": "兴泸水务",
-  "documentation": "https://github.com/caiwx86/lzss_water_ha",
-  "dependencies": [],
-  "codeowners": ["@caiwx86"],
-  "requirements": ["aiohttp>=3.8.0", "beautifulsoup4>=4.9.3"],
-  "version": "2.0.1",
+  "codeowners": [
+    "@caiwx86"
+  ],
   "config_flow": true,
-  "iot_class": "cloud_polling"
-} 
+  "documentation": "https://github.com/caiwx86/lzss_water_ha",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/caiwx86/lzss_water_ha/issues",
+  "requirements": [
+    "beautifulsoup4>=4.9.3"
+  ],
+  "version": "3.0.0"
+}

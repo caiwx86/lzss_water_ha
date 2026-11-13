@@ -1,17 +1,76 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "title": "水费查询配置",
-                "description": "请输入您的户号和访问令牌（Token）",
-                "data": {
-                    "account_number": "户号",
-                    "token": "访问令牌"
-                }
-            }
-        },
-        "abort": {
-            "already_configured": "该户号已经配置"
+  "config": {
+    "flow_title": "兴泸水务 {account_number}",
+    "step": {
+      "user": {
+        "title": "添加兴泸水务账户",
+        "description": "请输入户号和访问令牌（Token）。Token 可通过抓包兴泸水务微信小程序获取，过期后需要重新授权。",
+        "data": {
+          "account_number": "户号",
+          "token": "访问令牌（Token）"
         }
+      },
+      "reauth_confirm": {
+        "title": "重新授权兴泸水务",
+        "description": "户号 {account_number} 的访问令牌已失效，请输入新的 Token。",
+        "data": {
+          "token": "访问令牌（Token）"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "无法连接兴泸水务服务器，请检查网络后重试。",
+      "invalid_auth": "访问令牌无效或已过期，请重新抓包获取 Token。",
+      "unknown": "发生未知错误，请查看 Home Assistant 日志。",
+      "no_data": "接口未返回可识别的水费数据，请确认户号是否正确。"
+    },
+    "abort": {
+      "already_configured": "该户号已经配置。",
+      "reauth_successful": "重新授权成功。",
+      "unknown": "找不到对应的配置条目。"
     }
-} 
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "兴泸水务选项",
+        "description": "调整水费数据的自动更新间隔。",
+        "data": {
+          "scan_interval": "更新间隔（小时）"
+        }
+      }
+    },
+    "abort": {
+      "unknown": "找不到对应的配置条目。"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "balance": {
+        "name": "水费余额"
+      },
+      "unpaid_count": {
+        "name": "未缴费笔数"
+      },
+      "unpaid_amount": {
+        "name": "未缴费金额"
+      },
+      "account_name": {
+        "name": "户名"
+      },
+      "service_address": {
+        "name": "用水地址"
+      }
+    },
+    "binary_sensor": {
+      "unpaid": {
+        "name": "欠费状态"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "刷新数据"
+      }
+    }
+  }
+}

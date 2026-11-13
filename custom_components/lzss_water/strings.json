@@ -1,0 +1,76 @@
+{
+  "config": {
+    "flow_title": "Luzhou Water {account_number}",
+    "step": {
+      "user": {
+        "title": "Add a Luzhou Water account",
+        "description": "Enter your account number and access token. You can capture the token from the Luzhou Water WeChat mini program; a new token is required after it expires.",
+        "data": {
+          "account_number": "Account number",
+          "token": "Access token"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthorize Luzhou Water",
+        "description": "The access token for account {account_number} has expired. Enter a new token.",
+        "data": {
+          "token": "Access token"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the Luzhou Water service. Check your network and try again.",
+      "invalid_auth": "The access token is invalid or has expired. Capture a new token and try again.",
+      "unknown": "An unexpected error occurred. Check the Home Assistant logs for details.",
+      "no_data": "The service returned no recognizable water bill data. Check the account number and try again."
+    },
+    "abort": {
+      "already_configured": "This account number is already configured.",
+      "reauth_successful": "Reauthorization was successful.",
+      "unknown": "The configuration entry could not be found."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Luzhou Water options",
+        "description": "Choose how often the water bill data is refreshed.",
+        "data": {
+          "scan_interval": "Update interval (hours)"
+        }
+      }
+    },
+    "abort": {
+      "unknown": "The configuration entry could not be found."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "balance": {
+        "name": "Water balance"
+      },
+      "unpaid_count": {
+        "name": "Unpaid bill count"
+      },
+      "unpaid_amount": {
+        "name": "Unpaid amount"
+      },
+      "account_name": {
+        "name": "Account holder"
+      },
+      "service_address": {
+        "name": "Service address"
+      }
+    },
+    "binary_sensor": {
+      "unpaid": {
+        "name": "Unpaid bills"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Refresh data"
+      }
+    }
+  }
+}

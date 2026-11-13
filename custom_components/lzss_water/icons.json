@@ -1,0 +1,35 @@
+{
+  "entity": {
+    "sensor": {
+      "balance": {
+        "default": "mdi:water"
+      },
+      "unpaid_count": {
+        "default": "mdi:receipt-text-outline"
+      },
+      "unpaid_amount": {
+        "default": "mdi:currency-cny"
+      },
+      "account_name": {
+        "default": "mdi:account-outline"
+      },
+      "service_address": {
+        "default": "mdi:map-marker-outline"
+      }
+    },
+    "binary_sensor": {
+      "unpaid": {
+        "default": "mdi:receipt-text-check-outline",
+        "state": {
+          "on": "mdi:alert-circle",
+          "off": "mdi:receipt-text-check"
+        }
+      }
+    },
+    "button": {
+      "refresh": {
+        "default": "mdi:refresh"
+      }
+    }
+  }
+}
