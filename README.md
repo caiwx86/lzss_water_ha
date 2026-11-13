@@ -90,9 +90,9 @@ Token 来自兴泸水务微信小程序：
 
 | 实体 | 类型 | 说明 |
 | --- | --- | --- |
-| `sensor.xing_lu_shui_wu_12345678_shui_fei_yu_e` | 传感器 | 水费余额，货币单位 CNY |
+| `sensor.xing_lu_shui_wu_12345678_shui_fei_yu_e` | 传感器 | 水费余额，单位：元 |
 | `sensor.xing_lu_shui_wu_12345678_wei_jiao_fei_bi_shu` | 传感器 | 未缴费笔数，单位“笔” |
-| `sensor.xing_lu_shui_wu_12345678_wei_jiao_fei_jin_e` | 传感器 | 未缴费金额，货币单位 CNY |
+| `sensor.xing_lu_shui_wu_12345678_wei_jiao_fei_jin_e` | 传感器 | 未缴费金额，单位：元 |
 | `binary_sensor.xing_lu_shui_wu_12345678_qian_fei_zhuang_tai` | 二进制传感器 | 存在欠费时为 `on`，设备类型为 problem |
 | `button.xing_lu_shui_wu_12345678_shua_xin_shu_ju` | 按钮 | 立即刷新一次数据 |
 | `sensor.xing_lu_shui_wu_12345678_hu_ming` | 诊断传感器 | 户名，默认禁用 |
@@ -246,6 +246,7 @@ python -m unittest discover -s tests -v
 - 新增诊断信息导出（自动脱敏）
 - 新增 v1 → v2 配置迁移
 - 默认刷新间隔调整为 12 小时（可在选项中修改）
+- 金额传感器保持“元”单位，避免升级后已有长期统计因单位从“元”变成“CNY”而被抑制
 - 解析层兼容字段大小写、中文键名、账单数组、旧版 HTML
 - 修复 README 中已失效的 YAML 配置说明
 

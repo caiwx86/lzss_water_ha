@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from homeassistant.components.sensor import (
-    SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
@@ -36,9 +35,8 @@ SENSORS: tuple[LzssWaterSensorEntityDescription, ...] = (
     LzssWaterSensorEntityDescription(
         key="balance",
         translation_key="balance",
-        device_class=SensorDeviceClass.MONETARY,
-        native_unit_of_measurement="CNY",
-        state_class=SensorStateClass.TOTAL,
+        native_unit_of_measurement="元",
+        state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=2,
         value_fn=lambda data: data.balance,
     ),
@@ -53,9 +51,8 @@ SENSORS: tuple[LzssWaterSensorEntityDescription, ...] = (
     LzssWaterSensorEntityDescription(
         key="unpaid_amount",
         translation_key="unpaid_amount",
-        device_class=SensorDeviceClass.MONETARY,
-        native_unit_of_measurement="CNY",
-        state_class=SensorStateClass.TOTAL,
+        native_unit_of_measurement="元",
+        state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=2,
         value_fn=lambda data: data.unpaid_amount,
     ),
